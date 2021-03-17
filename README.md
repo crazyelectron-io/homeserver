@@ -1,4 +1,4 @@
-[![Build Status](https://dev.azure.com/crazyelectron/Home-Deploy/_apis/build/status/crazyelectron-io.homeserver?branchName=main)](https://dev.azure.com/crazyelectron/Home-Deploy/_build/latest?definitionId=5&branchName=main)
+[![Build Status](https://dev.azure.com/crazyelectron/HomeServer/_apis/build/status/crazyelectron-io.homeserver?branchName=main)](https://dev.azure.com/crazyelectron/HomeServer/_build/latest?definitionId=6&branchName=main)
 # Setup instructions
 
 Login to the correct Azure tenant and select the subscription to use.
