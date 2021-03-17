@@ -1,0 +1,13 @@
+{
+    "files.exclude": {
+        "**/.classpath": true,
+        "**/.project": true,
+        "**/.settings": true,
+        "**/.factorypath": true,
+        "**/.git-crypt": true,
+        "**/.git": true,
+        "**/.nuxt": true,
+        "**/node_modules": true,
+        "**/.eslintcache": true
+    }
+}

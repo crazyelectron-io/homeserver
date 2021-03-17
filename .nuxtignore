@@ -1,0 +1,4 @@
+# Add files to ignore
+
+# Ignore layout files whose name ends with -ignore.vue
+layouts/\*-ignore.vue
