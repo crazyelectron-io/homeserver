@@ -1,7 +1,6 @@
-# Starter pipeline
-# Start with a minimal pipeline that you can customize to build and deploy your code.
-# Add steps that build, run tests, deploy, and more:
-# https://aka.ms/yaml
+# See https://aka.ms/yaml
+
+name: Home Deploy
 
 trigger:
 - main
@@ -9,9 +8,34 @@ trigger:
 pool:
   vmImage: ubuntu-latest
 
+stages:
+- stage: Validate
+  jobs:
+  - job: Validate
+    continueOnError: false
+    steps:
+    - publish: terraform
+      artifact: terraform_out
+    - task: charleszipp.azure-pipelines-tasks-terraform.azure-pipelines-tasks-terraform-cli.TerraformCLI@0
+      displayName: 'Terraform init'
+      inputs:
+        command: init
+        workingDirectory: 1-terraform
+        backendType: azurerm
+        backendServiceArm: 'Azure SPN'
+        backendAzureRmResourceGroupName: 'AKSTerraform-RG'
+        backendAzureRmStorageAccountName: 'nyuenterraformstate'
+        backendAzureRmContainerName: 'tfstate'
+        backendAzureRmKey: 'demo.terraform.tfstate'
+    - task: charleszipp.azure-pipelines-tasks-terraform.azure-pipelines-tasks-terraform-cli.TerraformCLI@0
+      displayName: 'Terraform validate'
+      inputs:
+        command: validate
+        workingDirectory: 1-terraform
+
 steps:
 - script: echo Hello, world!
-  displayName: 'Run a one-line script'
+  displayName: 'Create Azure VM'
 
 - script: |
     echo Add other tasks to build, test, and deploy your project.

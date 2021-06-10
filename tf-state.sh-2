@@ -1,0 +1,69 @@
+#!/bin/bash
+
+cd ./terraform
+
+RESOURCE_GROUP_NAME=hometerra-rg
+STORAGE_ACCOUNT_NAME=hometfstate
+CONTAINER_NAME=tfstate
+
+# Login to Azure
+az login
+az account list --output table
+#az account set --subscription <Azure-SubscriptionId>
+
+# Create resource group
+az group create --name $RESOURCE_GROUP_NAME --location westeurope
+
+# Create storage account
+az storage account create --resource-group $RESOURCE_GROUP_NAME --name $STORAGE_ACCOUNT_NAME --sku Standard_LRS --encryption-services blob
+
+# Get storage account key
+ACCOUNT_KEY=$(az storage account keys list --resource-group $RESOURCE_GROUP_NAME --account-name $STORAGE_ACCOUNT_NAME --query '[0].value' -o tsv)
+
+# Create blob container
+az storage container create --name $CONTAINER_NAME --account-name $STORAGE_ACCOUNT_NAME --account-key $ACCOUNT_KEY
+
+echo "resource_group_name: $RESOURCE_GROUP_NAME"
+echo "storage_account_name: $STORAGE_ACCOUNT_NAME"
+echo "container_name: $CONTAINER_NAME"
+echo "access_key: $ACCOUNT_KEY"
+export ARM_ACCESS_KEY=$ACCOUNT_KEY
+
+az keyvault create -n hometfkvlt -g hometerra-rg -l westeurope
+
+az storage container generate-sas --account-name hometfstate --expiry 2022-04-01 --name tfstate --permissions dlrw -o json | xargs az keyvault secret set --vault-name hometfkvlt --name hometfsas --value
+
+/**************************************************************************************
+#---Login to tenant (optionally select correct subscription)
+az login
+az account list --output table
+#az account set --subscription <Azure-SubscriptionId>
+#---Create the resource Group
+az group create -n hometerra-rg -l westeurope
+Location    Name
+----------  ---------------
+westeurope  hometerra-rg
+#---Create the storage account
+az storage account create -n hometfstate -g hometerra-rg -l westeurope
+#---Create a tfstate container
+az storage container create -n tfstate --account-name hometfstate
+#---Create the KeyVault
+az keyvault create -n hometfkvlt -g hometerra-rg -l westeurope
+Location    Name            ResourceGroup
+----------  --------------  ---------------
+eastus2     <YOUR_KV_NAME>  AksTerraform-RG
+#---Create a SAS Token for the storage account, store it in KeyVault
+az storage container generate-sas --account-name hometfstate --expiry 2022-04-01 --name tfstate --permissions dlrw -o json | xargs az keyvault secret set --vault-name hometfkvlt --name hometfsas --value
+#---Store the SSH public key in Azure KeyVault
+az keyvault secret set --vault-name hometfkvlt --name LinuxSSHPubKey -f ~/.ssh/beheerder_key.pub > /dev/null
+#---Create a Service Principal for Azure DevOps
+az ad sp create-for-rbac -n "hometfSPN" --role="Contributor" --scopes="/subscriptions/SUBSCRIPTION_ID"
+# The output values will be mapped to these Terraform variables:
+# appId (Azure) → client_id (Terraform).
+# password (Azure) → client_secret (Terraform).
+# tenant (Azure) → tenant_id (Terraform).
+#---Store the service principal id in Azure KeyVault
+az keyvault secret set --vault-name hometfkvlt --name spn-id --value <SPN_ID> /dev/null
+#store the service principal secret in Azure KeyVault
+az keyvault secret set --vault-name hometfkvlt --name spn-secret --value <SPN_SECRET> /dev/null
+*/
