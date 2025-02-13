@@ -1,0 +1,41 @@
+---
+services:
+  code-server:
+    image: lscr.io/linuxserver/code-server:latest
+    container_name: code-server
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=Europe/Amsterdam
+      - DEFAULT_WORKSPACE=/workspace
+    secrets:
+      - codeServerPassword
+      - codeerverProxyDomain
+    volumes:
+      - ./config:/config:rw
+      - ../:/workspace:rw
+    ports:
+      - 8443:8443
+    restart: unless-stopped
+    networks:
+      - frontend
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.code.entrypoints=http-external"
+      - "traefik.http.routers.code.rule=Host(`code.moerman.online`)"
+      - "traefik.http.middlewares.code-https-redirect.redirectscheme.scheme=https"
+      - "traefik.http.routers.code.middlewares=code-https-redirect"
+      - "traefik.http.routers.code-secure.entrypoints=https-external"
+      - "traefik.http.routers.code-secure.rule=Host(`code.moerman.online`)"
+      - "traefik.http.routers.code-secure.tls=true"
+      - "traefik.http.routers.code.service=code"
+      - "traefik.http.services.code.loadbalancer.server.port=8443"
+      - "traefik.docker.network=frontend"
+    security_opt:
+      - no-new-privileges:true
+secrets:
+  my_secret:
+    file: ./my_secret.txt
+networks:
+  frontend:
+    external: true
