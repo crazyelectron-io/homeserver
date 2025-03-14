@@ -1,0 +1,119 @@
+---
+services:
+
+  postgres-n8n:
+    image: docker.io/library/postgres:16
+    container_name: postgres-n8n
+    hostname: postgres-n8n
+    restart: "no"
+    environment:
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - N8N_DATABASE_NAME
+      - N8N_DATABASE_USER
+      - N8N_DATABASE_PASSWORD
+    command:
+      - bash
+      - -c
+      - |
+        PGPASSWORD=${POSTGRES_PASSWORD} psql -U ${POSTGRES_USER} -d ${POSTGRES_DB} --host postgresdb -c "CREATE USER ${N8N_DATABASE_USER} WITH PASSWORD '${N8N_DATABASE_PASSWORD}';"
+        PGPASSWORD=${POSTGRES_PASSWORD} psql -U ${POSTGRES_USER} -d ${POSTGRES_DB} --host postgresdb -c "GRANT ALL PRIVILEGES ON DATABASE ${N8N_DATABASE_NAME} TO ${N8N_DATABASE_USER};"
+        PGPASSWORD=${POSTGRES_PASSWORD} psql -U ${POSTGRES_USER} -d ${POSTGRES_DB} --host postgresdb -c "GRANT CEATE ON SCHEMA public TO ${N8N_DATABASE_USER};"
+    networks:
+      - backend
+
+  redis-n8n:
+    image: redis:6-alpine
+    restart: always
+    volumes:
+      - /mnt/data/appdata/n8n/redis:/data:rw
+    healthcheck:
+      test: ['CMD', 'redis-cli', 'ping']
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    networks:
+      - backend
+  
+  n8n:
+    restart: unless-stopped
+    image: docker.n8n.io/n8nio/n8n
+    environment:
+      - DB_TYPE=postgresdb
+      - DB_POSTGRESDB_HOST=postgresdb
+      - DB_POSTGRESDB_PORT=5432
+      - DB_POSTGRESDB_DATABASE=${N8N_DATABASE_NAME}
+      - DB_POSTGRESDB_USER=${N8N_DATABASE_USER}
+      - DB_POSTGRESDB_PASSWORD=${N8N_DATABASE_PASSWORD}
+      - EXECUTIONS_MODE=queue
+      - QUEUE_BULL_REDIS_HOST=redis
+      - QUEUE_HEALTH_CHECK_ACTIVE=true
+      - N8N_ENCRYPTION_KEY=${N8N_ENCRYPTION_KEY}
+    links:
+      - postgresdb
+      - redis
+    volumes:
+      - /mnt/data/appdata/n8n/data:/home/node/.n8n
+    depends_on:
+      redis:
+        condition: service_healthy
+      postgres:
+        condition: service_healthy
+      postgres-n8n:
+        condition: service_completed_successfully
+    ports:
+      - 5678:5678
+    networks:
+      - backend
+      - frontend
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.n8n.entrypoints=http"
+      - "traefik.http.routers.n8n.rule=Host(`${HOME_DOMAIN}`) && PathPrefix(`/n8n`)"
+      - "traefik.http.middlewares.n8n-https-redirect.redirectscheme.scheme=https"
+      - "traefik.http.routers.n8n.middlewares=n8n-https-redirect"
+      - "traefik.http.routers.n8n-secure.entrypoints=https"
+      - "traefik.http.routers.n8n-secure.rule=Host(`${HOME_DOMAIN}`) && PathPrefix(`/n8n`)"
+      - "traefik.http.routers.n8n-secure.middlewares=authentik@file"
+      - "traefik.http.routers.n8n-secure.tls=true"
+      - "traefik.http.routers.n8n.service=n8n"
+      - "traefik.http.services.n8n.loadbalancer.server.port=5678"
+
+  n8n-worker:
+    image: docker.n8n.io/n8nio/n8n
+    container_name: n8n-worker
+    hostname: n8n-worker
+    restart: unless-stopped
+    environment:
+      - DB_TYPE=postgresdb
+      - DB_POSTGRESDB_HOST=postgresdb
+      - DB_POSTGRESDB_PORT=5432
+      - DB_POSTGRESDB_DATABASE=${N8N_DATABASE_NAME}
+      - DB_POSTGRESDB_USER=${N8N_DATABASE_USER}
+      - DB_POSTGRESDB_PASSWORD=${N8N_DATABASE_PASSWORD}
+      - EXECUTIONS_MODE=queue
+      - QUEUE_BULL_REDIS_HOST=redis
+      - QUEUE_HEALTH_CHECK_ACTIVE=true
+      - N8N_ENCRYPTION_KEY=${N8N_ENCRYPTION_KEY}
+    links:
+      - postgresdb
+      - postgres-n8n
+      - redis
+    volumes:
+      - /mnt/data/appdata/n8n/data:/home/node/.n8n
+    depends_on:
+      redis:
+        condition: service_healthy
+      postgresdb:
+        condition: service_healthy
+      n8n:
+        condition: service_completed_successfully
+    command: worker
+    networks:
+      - backend
+
+networks:
+  backend:
+    external: true
+  frontend:
+    external: true
