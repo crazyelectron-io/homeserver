@@ -50,7 +50,7 @@ services:
       - DB_POSTGRESDB_USER=${N8N_DATABASE_USER}
       - DB_POSTGRESDB_PASSWORD=${N8N_DATABASE_PASSWORD}
       - EXECUTIONS_MODE=queue
-      - QUEUE_BULL_REDIS_HOST=redis
+      - QUEUE_BULL_REDIS_HOST=redis-n8n
       - QUEUE_HEALTH_CHECK_ACTIVE=true
       - N8N_ENCRYPTION_KEY=${N8N_ENCRYPTION_KEY}
     links:
@@ -98,15 +98,12 @@ services:
       - QUEUE_HEALTH_CHECK_ACTIVE=true
       - N8N_ENCRYPTION_KEY=${N8N_ENCRYPTION_KEY}
     links:
-      - postgresdb
       - postgres-n8n
-      - redis
+      - redis-n8n
     volumes:
       - /mnt/data/appdata/n8n/data:/home/node/.n8n
     depends_on:
-      redis:
-        condition: service_healthy
-      postgresdb:
+      redis-n8n:
         condition: service_healthy
       n8n:
         condition: service_completed_successfully
