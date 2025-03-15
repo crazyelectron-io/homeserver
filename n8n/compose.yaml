@@ -5,13 +5,11 @@ services:
     image: docker.io/library/postgres:16
     container_name: postgres-n8n
     hostname: postgres-n8n
+    env_file: .env
     restart: "no"
     environment:
       - POSTGRES_USER=${POSTGRES_USER}
       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
-      - N8N_DATABASE_NAME
-      - N8N_DATABASE_USER
-      - N8N_DATABASE_PASSWORD
     command:
       - bash
       - -c
