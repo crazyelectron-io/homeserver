@@ -51,11 +51,11 @@ services:
       - N8N_ENCRYPTION_KEY=${N8N_ENCRYPTION_KEY}
     links:
       - postgresdb
-      - redis
+      - redis-n8n
     volumes:
       - /mnt/data/appdata/n8n/data:/home/node/.n8n
     depends_on:
-      redis:
+      redis-n8n:
         condition: service_healthy
       postgresdb:
         condition: service_healthy
