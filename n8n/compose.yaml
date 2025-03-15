@@ -57,7 +57,7 @@ services:
     depends_on:
       redis:
         condition: service_healthy
-      postgres:
+      postgresdb:
         condition: service_healthy
       postgres-n8n:
         condition: service_completed_successfully
