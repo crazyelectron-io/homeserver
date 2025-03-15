@@ -23,11 +23,11 @@ services:
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.ntfy.entrypoints=http"
-      - "traefik.http.routers.ntfy.rule=Host(`${HOME_DOMAIN}`) && PathPrefix(`/ntfy`)"
+      - "traefik.http.routers.ntfy.rule=Host(`ntfy.moerman.online`)"
       - "traefik.http.middlewares.ntfy-https-redirect.redirectscheme.scheme=https"
       - "traefik.http.routers.ntfy.middlewares=ntfy-https-redirect"
       - "traefik.http.routers.ntfy-secure.entrypoints=https"
-      - "traefik.http.routers.ntfy-secure.rule=Host(`${HOME_DOMAIN}`) && PathPrefix(`/ntfy`)"
+      - "traefik.http.routers.ntfy-secure.rule=Host(`ntfy.moerman.online`)"
       - "traefik.http.routers.ntfy-secure.middlewares=authentik@file"
       - "traefik.http.routers.ntfy-secure.tls=true"
       - "traefik.http.routers.ntfy.service=ntfy"
