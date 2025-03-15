@@ -54,14 +54,11 @@ services:
       - QUEUE_HEALTH_CHECK_ACTIVE=true
       - N8N_ENCRYPTION_KEY=${N8N_ENCRYPTION_KEY}
     links:
-      - postgresdb
       - redis-n8n
     volumes:
       - /mnt/data/appdata/n8n/data:/home/node/.n8n
     depends_on:
       redis-n8n:
-        condition: service_healthy
-      postgresdb:
         condition: service_healthy
       postgres-n8n:
         condition: service_completed_successfully
@@ -122,3 +119,11 @@ networks:
     external: true
   frontend:
     external: true
+N8N_DATABASE_NAME = [[N8N_DATABASE_NAME]]
+N8N_DATABASE_USER = [[N8N_DATABASE_USER]]
+N8N_DATABASE_PASSWORD = [[N8N_DATABASE_PASSWORD]]
+N8N_ENCRYPTION_KEY = [[N8N_ENCRYPTION_KEY]]
+HOME_DOMAIN =[[HOME_DOMAIN]]
+POSTGRES_USER = [[POSTGRES_USER]]
+POSTGRES_PASSWORD = [[POSTGRES_PASSWORD]]
+POSTGRES_DB = [[POSTGRES_DB]]
