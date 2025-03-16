@@ -22,8 +22,8 @@ loki.source.file "samba_files" {
 loki.process "add_samba_label" {
   stage.logfmt {
     mapping = {
-      "extracted_level = "level"
-      "extracted_msg = "msg"
+      "extracted_level = "level",
+      "extracted_msg = "msg",
     }
   }
   // Add the value of "extracted_level from the extracted map as "level" label
