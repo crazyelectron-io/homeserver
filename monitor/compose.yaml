@@ -122,7 +122,6 @@ services:
     restart: "no"
     entrypoint: ["/bin/bash", "-c"]
     command: ["cp -f /setup/loki.yaml /etc/loki"]
-    # env_file: .env
     volumes:
       - ./config:/setup
       - /mnt/data/appdata/loki/config:/etc/loki
@@ -132,23 +131,12 @@ services:
     image: grafana/loki:3.4.2
     user: 1000:1000
     command: ["-config.file=/etc/loki/loki.yaml", "-config.expand-env=true"]
-    ports:
-      - 3100:3100
     volumes:
       - /mnt/data/appdata/loki/config:/etc/loki
       - /mnt/data/appdata/loki/data:/loki
-    # labels:
-    #   - "traefik.enable=true"
-    #   - "traefik.http.routers.loki.entrypoints=https"
-    #   - "traefik.http.routers.loki.rule=Host(`${LOKI_DOMAIN}`)"
-    #   - "traefik.http.routers.loki.tls=true"
-    #   - "traefik.http.routers.loki.service=loki"
-    #   - "traefik.http.services.loki.loadbalancer.server.port=3100"
-      # - "traefik.http.routers.loki.middlewares=authentik@file"
     restart: unless-stopped
     networks:
       - backend
-      # - frontend
     depends_on:
       - init-loki
 
@@ -180,8 +168,6 @@ services:
   cadvisor:
     image: gcr.io/cadvisor/cadvisor
     container_name: cadvisor
-    # ports:
-    #   - "8080:8080"
     volumes:
       - /:/rootfs:ro
       - /var/run:/var/run:ro
