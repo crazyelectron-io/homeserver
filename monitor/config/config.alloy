@@ -1,0 +1,83 @@
+logging {
+  level = "info"
+  format = "logfmt"
+}
+
+// For live debugging, enable the block below and add `--stability.level=exeperimental` command line flag.
+//livedebugging {
+//  enabled = true
+//}
+
+// --- Collect Samba logs
+loki.source.file "samba_files" {
+  targets       = [
+    {"__path__" = "/var/log/samba"},
+  ]
+  forward_to    = [loki.write.grafana_loki.receiver]
+  tail_from_end = true
+}
+
+// --- Collect journal logs
+loki.relabel "journal" {
+  forward_to = []
+
+  rule {
+    source_labels = ["__journal__systemd_unit"]
+    target_label  = "systemd_unit"
+  }
+  rule {
+    source_labels = ["__journal__hostname"]
+    target_label = "systemd_hostname"
+  }
+  rule {
+    source_labels = ["__journal__transport"]
+    target_label = "systemd_transport"
+  }
+}
+// loki.source.journal "read"  {
+//   forward_to    = [loki.write.grafana_loki.receiver]
+//   relabel_rules = loki.relabel.journal.rules
+//   max_age       = "24h"
+//   labels        = {component = "loki.source.journal"}
+//   path          = "/var/log/journal"
+// }
+
+// --- Collect Docker logs
+discovery.docker "logs_integrations_docker" {
+  host = "unix:///var/run/docker.sock"
+  refresh_interval = "5s"
+}
+discovery.relabel "logs_integrations_docker" {
+  targets = []
+  rule {
+    target_label = "job"
+    replacement = "integrations/docker"
+  }
+  rule {
+    target_label = "instance"
+    replacement = constants.hostname
+  }
+  rule {
+    source_labels = ["__meta_docker_container_name"]
+    regex = "/(.*)"
+    target_label = "container"
+  }
+  rule {
+    source_labels = ["__meta_docker_container_log_stream"]
+    target_label = "stream"
+  }
+}
+loki.source.docker "logs_integrations_docker" {
+  host = "unix:///var/run/docker.sock"
+  targets = discovery.docker.logs_integrations_docker.targets
+  forward_to = [loki.write.grafana_loki.receiver]
+  relabel_rules = discovery.relabel.logs_integrations_docker.rules
+  refresh_interval = "5s"
+}
+
+// --- Send logs to Loki
+loki.write "grafana_loki" {
+  endpoint {
+    url = "http://loki:3100/loki/api/v1/push"
+  }
+}
