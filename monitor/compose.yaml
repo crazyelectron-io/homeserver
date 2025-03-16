@@ -121,7 +121,7 @@ services:
     image: debian:stable-slim
     restart: "no"
     entrypoint: ["/bin/bash", "-c"]
-    command: ["ls -al /setup && ls -al /etc/loki && cp -f /setup/loki.yaml /etc/loki && cat /etc/loki/loki.yaml"]
+    command: ["cp -f /setup/loki.yaml /etc/loki"]
     # env_file: .env
     volumes:
       - ./config:/setup
@@ -152,30 +152,30 @@ services:
     depends_on:
       - init-loki
 
-  # node_exporter:
-  #   image: quay.io/prometheus/node-exporter:v1.9.0
-  #   container_name: node_exporter
-  #   volumes:
-  #     - /proc:/host/proc:ro
-  #     - /sys:/host/sys:ro
-  #     - /:/rootfs:ro,rslave
-  #   command:
-  #     - --path.procfs=/host/proc
-  #     - --path.sysfs=/host/sys
-  #     - --path.rootfs=/rootfs
-  #     - --path.udev.data=/rootfs/run/udev/data
-  #     - --collector.filesystem.mount-points-exclude=^/(sys|proc|dev|host|etc)($$|/)
-  #     - --collector.interrupts
-  #     - --collector.processes
-  #   # pid: host
-  #   restart: unless-stopped
-  #   privileged: true
-  #   cap_add:
-  #     - SYS_PTRACE
-  #   security_opt:
-  #     - seccomp:unconfined
-  #   networks:
-  #     - backend
+  node_exporter:
+    image: quay.io/prometheus/node-exporter:v1.9.0
+    container_name: node_exporter
+    volumes:
+      - /proc:/host/proc:ro
+      - /sys:/host/sys:ro
+      - /:/rootfs:ro,rslave
+    command:
+      - --path.procfs=/host/proc
+      - --path.sysfs=/host/sys
+      - --path.rootfs=/rootfs
+      - --path.udev.data=/rootfs/run/udev/data
+      - --collector.filesystem.mount-points-exclude=^/(sys|proc|dev|host|etc)($$|/)
+      - --collector.interrupts
+      - --collector.processes
+    # pid: host
+    restart: unless-stopped
+    privileged: true
+    cap_add:
+      - SYS_PTRACE
+    security_opt:
+      - seccomp:unconfined
+    networks:
+      - backend
 
   # cadvisor:
   #   image: gcr.io/cadvisor/cadvisor
