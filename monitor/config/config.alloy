@@ -70,28 +70,28 @@ discovery.relabel "logs_integrations_docker" {
 loki.source.docker "logs_integrations_docker" {
   host = "unix:///var/run/docker.sock"
   targets = discovery.docker.logs_integrations_docker.targets
-  // forward_to = [loki.write.grafana_loki.receiver]
-  forward_to       = [loki.process.docker_local.receiver]
+  forward_to = [loki.write.grafana_loki.receiver]
+  //forward_to       = [loki.process.docker_local.receiver]
   relabel_rules = discovery.relabel.logs_integrations_docker.rules
   refresh_interval = "5s"
 }
-loki.process "docker_local" {
-  forward_to = [loki.write.grafana_loki.receiver]
-  stage.json {
-    expressions = {
-      time = "",
-    }
-  }
-  stage.timestamp {
-    format = "RFC3339Nano"
-    source = "time"
-  }
-  stage.drop {
-    source = "timestamp"
-    older_than = "15m"
-    drop_counter_reason = "too old"
-  }
-}
+//loki.process "docker_local" {
+//  forward_to = [loki.write.grafana_loki.receiver]
+//  stage.json {
+//    expressions = {
+//      time = "",
+//    }
+//  }
+//  stage.timestamp {
+//    format = "RFC3339Nano"
+//    source = "time"
+//  }
+//  stage.drop {
+//    source = "timestamp"
+//    older_than = "15m"
+//    drop_counter_reason = "too old"
+//  }
+//}
 
 
 // --- Send logs to Loki
