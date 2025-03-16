@@ -13,18 +13,23 @@ local.file_match "samba_logs" {
   path_targets = [
     {__path__ = "/var/log/samba/log.nmbd"},
   ]
+  sync_period = "30s"
 }
 loki.source.file "samba_files" {
   targets       = local.file_match.samba_logs.targets
   forward_to    = [loki.write.grafana_loki.receiver]
-  labels        = {component = "loki.source.samba"}
-  //tail_from_end = true
 }
 
 // --- Collect journal logs
+loki.source.journal "read"  {
+  forward_to    = [loki.write.grafana_loki.receiver]
+  relabel_rules = loki.relabel.journal.rules
+  max_age       = "24h"
+  labels        = {component = "loki.source.journal"}
+  path          = "/var/log/journal"
+}
 loki.relabel "journal" {
   forward_to = []
-
   rule {
     source_labels = ["__journal__systemd_unit"]
     target_label  = "systemd_unit"
@@ -37,13 +42,6 @@ loki.relabel "journal" {
     source_labels = ["__journal__transport"]
     target_label = "systemd_transport"
   }
-}
-loki.source.journal "read"  {
-  forward_to    = [loki.write.grafana_loki.receiver]
-  relabel_rules = loki.relabel.journal.rules
-  max_age       = "24h"
-  labels        = {component = "loki.source.journal"}
-  path          = "/var/log/journal"
 }
 
 // --- Collect Docker logs
