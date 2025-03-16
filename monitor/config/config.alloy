@@ -9,12 +9,15 @@ logging {
 //}
 
 // --- Collect Samba logs
-loki.source.file "samba_files" {
-  targets       = [
-    {"__path__" = "/var/log/samba"},
+local.file_match "samba_logs" {
+  path_targets = [
+    {__path__ = "/var//log/samba/*.log"},
   ]
+}
+loki.source.file "samba_files" {
+  targets       = local.file_match.samba_logs.targets
   forward_to    = [loki.write.grafana_loki.receiver]
-  tail_from_end = true
+  //tail_from_end = true
 }
 
 // --- Collect journal logs
