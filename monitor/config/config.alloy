@@ -11,7 +11,7 @@ logging {
 // --- Collect Samba logs
 local.file_match "samba_logs" {
   path_targets = [
-    {__path__ = "/var//log/samba/*.log"},
+    {__path__ = "/var/log/samba/*.log"},
   ]
 }
 loki.source.file "samba_files" {
