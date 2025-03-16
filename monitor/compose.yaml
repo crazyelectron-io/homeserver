@@ -21,7 +21,7 @@ services:
     command: ["cp -f /setup/prometheus.yaml /etc/prometheus"]
     volumes:
       - ./config:/setup:ro
-      - /mnt/data/appdata/prometheus:/etc/prometheus:rw
+      - /mnt/data/appdata/prometheus/config:/etc/prometheus:rw
     networks:
       - backend
 
@@ -39,6 +39,8 @@ services:
     restart: unless-stopped
     networks:
       - backend
+    depends_on:
+      - init-prometheus
 
   # pginit-grafana:
   #   container_name: pginit-grafana
