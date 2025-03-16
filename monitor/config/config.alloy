@@ -11,7 +11,7 @@ logging {
 // --- Collect Samba logs
 local.file_match "samba_logs" {
   path_targets = [
-    {__path__ = "/var/log/samba/log.nmbd"},
+    {__path__ = "/var/log/samba/log.*"},
   ]
   sync_period = "30s"
 }
