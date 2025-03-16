@@ -18,9 +18,9 @@ global:
   # to the values of the current environment variables. 
   # References to undefined variables are replaced by the empty string.
   # The `$` character can be escaped by using `$$`.
-  external_labels:
-    monitor: homeserver
-    env: prod
+  # external_labels:
+  #   monitor: homeserver
+  #   env: prod
 
 # --- A scrape configuration containing exactly one endpoint to scrape.
 scrape_configs:
@@ -55,10 +55,10 @@ scrape_configs:
   #         monitor: "prometheus"
 
 # --- Alertmanager configuration
-alerting:
-  alertmanagers:
-    - static_configs:
-        - targets:
+# alerting:
+#   alertmanagers:
+#     - static_configs:
+#         - targets:
           # - alertmanager:9093
 
 # Load rules once and periodically evaluate them according to the global 'evaluation_interval'.
