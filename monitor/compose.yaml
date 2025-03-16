@@ -46,19 +46,20 @@ services:
     depends_on:
       - init-prometheus
 
-  # pginit-grafana:
-  #   container_name: pginit-grafana
-  #   hostname: pginit-grafana
-  #   image: docker.io/library/postgres:16
-  #   restart: "no"
-  #   command:
-  #     - bash
-  #     - -c
-  #     - |
-  #       PGPASSWORD=${POSTGRES_PASSWORD} psql -U ${POSTGRES_USER} -d ${POSTGRES_DB} --host postgresdb -c "CREATE ROLE ${GF_DATABASE_USER} WITH LOGIN INHERIT NOREPLICATION BYPASSRLS CONNECTION LIMIT -1 PASSWORD '${GF_DATABASE_PASSWORD}';"
-  #       PGPASSWORD=${POSTGRES_PASSWORD} psql -U ${POSTGRES_USER} -d ${POSTGRES_DB} --host postgresdb -c "CREATE DATABASE ${GF_DATABASE_NAME} WITH OWNER = ${GF_DATABASE_USER} ENCODING = 'UTF8' LOCALE_PROVIDER = 'libc' CONNECTION LIMIT = -1 IS_TEMPLATE = False;"
-  #   networks:
-  #     - backend
+  # --- pginit-grafana - Initialize Grafana database
+  pginit-grafana:
+    container_name: pginit-grafana
+    hostname: pginit-grafana
+    image: docker.io/library/postgres:16
+    restart: "no"
+    command:
+      - bash
+      - -c
+      - |
+        PGPASSWORD=${POSTGRES_PASSWORD} psql -U ${POSTGRES_USER} -d ${POSTGRES_DB} --host postgresdb -c "CREATE ROLE ${GF_DATABASE_USER} WITH LOGIN INHERIT NOREPLICATION BYPASSRLS CONNECTION LIMIT -1 PASSWORD '${GF_DATABASE_PASSWORD}';"
+        PGPASSWORD=${POSTGRES_PASSWORD} psql -U ${POSTGRES_USER} -d ${POSTGRES_DB} --host postgresdb -c "CREATE DATABASE ${GF_DATABASE_NAME} WITH OWNER = ${GF_DATABASE_USER} ENCODING = 'UTF8' LOCALE_PROVIDER = 'libc' CONNECTION LIMIT = -1 IS_TEMPLATE = False;"
+    networks:
+      - backend
 
   # grafana:
   #   image: docker.io/grafana/grafana-oss:11.5.2
@@ -107,35 +108,51 @@ services:
   #     - "traefik.http.routers.grafana-secure.tls=true"
   #     - "traefik.http.routers.grafana.service=grafana"
   #     - "traefik.docker.network=frontend"
-    
-  # alloy:
-  #   image: grafana/alloy:latest
-  #   container_name: alloy
-  #   volumes:
-  #     - ./config:/etc/alloy
-  #     - /var/log/journal:/var/log/journal:ro
-  #     - /var/log/samba:/var/log/samba:ro
-  #     - /var/run/docker.sock:/var/run/docker.sock:ro
-  #   ports:
-  #     - 12345:12345
-  #   command: [
-  #     "run",
-  #     "--server.http.listen-addr=0.0.0.0:12345",
-  #     "--stability.level=public-preview",
-  #     "--storage.path=/var/lib/alloy/data",
-  #     "/etc/alloy/config.alloy",
-  #   ]
-  #   restart: unless-stopped
-  #   networks:
-  #     - frontend
-  #     - backend
-  #   privileged: true
-  #   cap_add:
-  #     - SYS_PTRACE
-  #   security_opt:
-  #     - seccomp:unconfined
 
-  # --- init-loki - Setup Loki configuration file (loki.yaml)
+  # --- init-alloy - Setup Alloy configuration file (config.alloy).
+  init-alloy:
+    container_name: init-alloy
+    image: debian:stable-slim
+    restart: "no"
+    entrypoint: ["/bin/bash", "-c"]
+    command: ["cp -f /setup/config.alloy /etc/alloy"]
+    volumes:
+      - ./config:/setup
+      - /mnt/data/appdata/alloy/config:/etc/alloy
+    networks:
+      - backend
+
+  # --- alloy - Grafana Alloy log and metrics querier service.
+  alloy:
+    image: grafana/alloy:latest
+    container_name: alloy
+    volumes:
+      - /mnt/data/appdata/alloy/config:/etc/alloy
+      - /var/log/journal:/var/log/journal:ro
+      - /var/log/samba:/var/log/samba:ro
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    ports:
+      - 12345:12345
+    command: [
+      "run",
+      "--server.http.listen-addr=0.0.0.0:12345",
+      "--stability.level=public-preview",
+      "--storage.path=/var/lib/alloy/data",
+      "/etc/alloy/config.alloy",
+    ]
+    restart: unless-stopped
+    networks:
+      - frontend
+      - backend
+    privileged: true
+    cap_add:
+      - SYS_PTRACE
+    security_opt:
+      - seccomp:unconfined
+    depends_on:
+      - init-alloy
+
+  # --- init-loki - Setup Loki configuration file (loki.yaml).
   init-loki:
     container_name: init-loki
     image: debian:stable-slim
@@ -148,7 +165,7 @@ services:
     networks:
       - backend
 
-  # --- loki - Grafana Loki log and metrics querier service
+  # --- loki - Grafana Loki log and metrics querier service.
   loki:
     container_name: loki
     image: grafana/loki:3.4.2
@@ -163,7 +180,7 @@ services:
     depends_on:
       - init-loki
 
-  # --- node_exporter - Prometheus exporter for hardware and OS metrics
+  # --- node_exporter - Prometheus exporter for hardware and OS metrics.
   node_exporter:
     image: quay.io/prometheus/node-exporter:v1.9.0
     container_name: node_exporter
@@ -189,7 +206,7 @@ services:
     networks:
       - backend
 
-  # --- cadvisor - Container metrics exporter for Prometheus
+  # --- cadvisor - Container metrics exporter for Prometheus.
   cadvisor:
     image: gcr.io/cadvisor/cadvisor
     container_name: cadvisor
@@ -206,7 +223,7 @@ services:
       - backend
 
 networks:
-  # frontend:
-  #   external: true
+  frontend:
+    external: true
   backend:
     external: true
