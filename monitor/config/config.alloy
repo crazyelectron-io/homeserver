@@ -86,12 +86,13 @@ loki.process "docker_local" {
     format = "RFC3339Nano"
     source = "time"
   }
+  stage.drop {
+    source = "timestamp"
+    older_than = "15m"
+    drop_counter_reason = "too old"
+  }
 }
-stage.drop {
-  source = "timestamp"
-  older_than = "15m"
-  drop_counter_reason = "too old"
-}
+
 
 // --- Send logs to Loki
 loki.write "grafana_loki" {
