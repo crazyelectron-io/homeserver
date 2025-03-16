@@ -3,12 +3,12 @@ logging {
   format = "logfmt"
 }
 
-// For live debugging, enable the block below and add `--stability.level=exeperimental` command line flag.
+// ------ For live debugging, enable the block below and add `--stability.level=exeperimental` command line flag.
 //livedebugging {
 //  enabled = true
 //}
 
-// --- Collect Samba logs
+// ------ Collect Samba logs
 local.file_match "samba_logs" {
   path_targets = [
     {__path__ = "/var/log/samba/log.*"},
@@ -17,6 +17,41 @@ local.file_match "samba_logs" {
 }
 loki.source.file "samba_files" {
   targets       = local.file_match.samba_logs.targets
+  forward_to    = [loki.write.grafana_loki.receiver]
+}
+loki.process "add_samba_label" {
+  stage.logfmt {
+    mapping = {
+      "extracted_level = "level"
+      "extracted_msg = "msg"
+    }
+  }
+  // Add the value of "extracted_level from the extracted map as "level" label
+  stage.labels {
+    values = {
+      "level" = "extracted_level",
+      "msg" = "extracted_msg",
+    }
+  }
+  forward_to = [loki.relabel.add_static_label.receiver]
+}
+loki.relabel "add_static_label" {
+  forward_to = [loki.write.grafana_loki.receiver]
+  rule {
+    target_label = "os"
+    replacment = constants.os
+  }
+}
+
+// ------ Collect Debian Dpkg logs
+local.file_match "dpkg_logs" {
+  path_targets = [
+    {__path__ = "/var/log/dpkg.log"},
+  ]
+  sync_period = "1m"
+}
+loki.source.file "dpkg_files" {
+  targets       = local.file_match.dpkg_logs.targets
   forward_to    = [loki.write.grafana_loki.receiver]
 }
 
