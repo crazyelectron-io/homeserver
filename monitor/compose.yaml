@@ -126,6 +126,7 @@ services:
       - ./config:/setup
       - /mnt/data/appdata/loki/config:/etc/loki
 
+  # --- loki - Grafana Loki log and metrics querier service
   loki:
     container_name: loki
     image: grafana/loki:3.4.2
@@ -140,6 +141,7 @@ services:
     depends_on:
       - init-loki
 
+  # --- node_exporter - Prometheus exporter for hardware and OS metrics
   node_exporter:
     image: quay.io/prometheus/node-exporter:v1.9.0
     container_name: node_exporter
@@ -165,6 +167,7 @@ services:
     networks:
       - backend
 
+  # --- cadvisor - Container metrics exporter for Prometheus
   cadvisor:
     image: gcr.io/cadvisor/cadvisor
     container_name: cadvisor
