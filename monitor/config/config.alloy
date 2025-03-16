@@ -11,7 +11,7 @@ logging {
 // ------ Collect Samba logs
 local.file_match "samba_logs" {
   path_targets = [
-    {__path__ = "/var/log/samba/log.*"},
+    {__path__ = "/var/log/samba/log.nmbd"},
   ]
   sync_period = "30s"
 }
@@ -20,26 +20,11 @@ loki.source.file "samba_files" {
   forward_to    = [loki.process.add_samba_label.receiver]
 }
 loki.process "add_samba_label" {
-  stage.logfmt {
-    mapping = {
-      "extracted_level" = "level",
-      "extracted_msg" = "msg",
-    }
-  }
-  // Add the value of "extracted_level from the extracted map as "level" label
-  stage.labels {
-    values = {
-      "level" = "extracted_level",
-      "msg" = "extracted_msg",
-    }
-  }
-  forward_to = [loki.relabel.add_static_label.receiver]
-}
-loki.relabel "add_static_label" {
   forward_to = [loki.write.grafana_loki.receiver]
-  rule {
-    target_label = "os"
-    replacement = constants.os
+  stage.static_labels {
+    values = {
+      "component" = "samba",
+    }
   }
 }
 
@@ -52,7 +37,15 @@ local.file_match "dpkg_logs" {
 }
 loki.source.file "dpkg_files" {
   targets       = local.file_match.dpkg_logs.targets
-  forward_to    = [loki.write.grafana_loki.receiver]
+  forward_to    = [loki.process.add_dpkg_label.receiver]
+}
+loki.process "add_dpkg_label" {
+  forward_to = [loki.write.grafana_loki.receiver]
+  stage.static_labels {
+    values = {
+      "component" = "dpkg",
+    }
+  }
 }
 
 // --- Collect journal logs
