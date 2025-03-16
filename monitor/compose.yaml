@@ -121,7 +121,7 @@ services:
     image: debian:stable-slim
     restart: "no"
     entrypoint: ["/bin/bash", "-c"]
-    command: ["ls -al /setup && ls -al /etc/loki && cp -f /setup/loki.yaml /etc/loki && ls -al /etc/loki"]
+    command: ["ls -al /setup && ls -al /etc/loki && cp -f /setup/loki.yaml /etc/loki && cat /etc/loki/loki.yaml"]
     # env_file: .env
     volumes:
       - ./config:/setup
