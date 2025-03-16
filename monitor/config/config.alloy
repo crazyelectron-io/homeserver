@@ -34,13 +34,13 @@ loki.relabel "journal" {
     target_label = "systemd_transport"
   }
 }
-// loki.source.journal "read"  {
-//   forward_to    = [loki.write.grafana_loki.receiver]
-//   relabel_rules = loki.relabel.journal.rules
-//   max_age       = "24h"
-//   labels        = {component = "loki.source.journal"}
-//   path          = "/var/log/journal"
-// }
+loki.source.journal "read"  {
+  forward_to    = [loki.write.grafana_loki.receiver]
+  relabel_rules = loki.relabel.journal.rules
+  max_age       = "24h"
+  labels        = {component = "loki.source.journal"}
+  path          = "/var/log/journal"
+}
 
 // --- Collect Docker logs
 discovery.docker "logs_integrations_docker" {
