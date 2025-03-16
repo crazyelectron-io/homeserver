@@ -39,7 +39,7 @@ loki.relabel "add_static_label" {
   forward_to = [loki.write.grafana_loki.receiver]
   rule {
     target_label = "os"
-    replacment = constants.os
+    replacement = constants.os
   }
 }
 
