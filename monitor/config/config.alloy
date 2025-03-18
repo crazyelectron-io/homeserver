@@ -13,10 +13,16 @@ local.file_match "samba_logs" {
   path_targets = [
     {__path__ = "/var/log/samba/log.nmbd"},
   ]
-  sync_period = "30s"
+  sync_period = "1m"
 }
 loki.source.file "samba_files" {
   targets       = local.file_match.samba_logs.targets
+  tail_from_end = false
+  /* decompression {
+    enabled       = true
+    initial_delay = "10s"
+    format        = "gz"
+  } */
   forward_to    = [loki.process.add_samba_label.receiver]
 }
 loki.process "add_samba_label" {
@@ -37,6 +43,7 @@ local.file_match "dpkg_logs" {
 }
 loki.source.file "dpkg_files" {
   targets       = local.file_match.dpkg_logs.targets
+  tail_from_end = false
   forward_to    = [loki.process.add_dpkg_label.receiver]
 }
 loki.process "add_dpkg_label" {
@@ -70,6 +77,11 @@ loki.relabel "journal" {
     source_labels = ["__journal__transport"]
     target_label = "systemd_transport"
   }
+  /* rule {
+    source_labels = ["systemd_unit"]
+    action = "keep"
+    regex = "ntp.service"
+  } */
 }
 
 // --- Collect Docker logs
@@ -81,20 +93,28 @@ discovery.relabel "logs_integrations_docker" {
   targets = []
   rule {
     target_label = "job"
-    replacement = "integrations/docker"
+    replacement  = "integrations/docker"
   }
   rule {
     target_label = "instance"
-    replacement = constants.hostname
+    replacement  = constants.hostname
   }
   rule {
     source_labels = ["__meta_docker_container_name"]
-    regex = "/(.*)"
-    target_label = "container"
+    regex         = "/(.*)"
+    target_label  = "container"
   }
   rule {
     source_labels = ["__meta_docker_container_log_stream"]
-    target_label = "stream"
+    target_label  = "stream"
+  }
+  rule {
+    source_labels = ["__meta_docker_network_ip"]
+    target_label  = "container_ip"
+  }
+  rule {
+    source_labels = ["__meta_docker_container_network_name"]
+    target_label  = "contaienr_network"
   }
 }
 loki.source.docker "logs_integrations_docker" {
