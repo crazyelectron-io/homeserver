@@ -20,21 +20,21 @@ services:
     networks:
       - backend
 
-  redisn8n:
-    image: redis:6-alpine
-    restart: always
-    env_file: .env
-    container_name: redisn8n
-    hostname: redisn8n
-    volumes:
-      - /mnt/data/appdata/n8n/redis:/data:rw
-    healthcheck:
-      test: ['CMD', 'redis-cli', 'ping']
-      interval: 5s
-      timeout: 5s
-      retries: 10
-    networks:
-      - backend
+  # redisn8n:
+  #   image: redis:6-alpine
+  #   restart: always
+  #   env_file: .env
+  #   container_name: redisn8n
+  #   hostname: redisn8n
+  #   volumes:
+  #     - /mnt/data/appdata/n8n/redis:/data:rw
+  #   healthcheck:
+  #     test: ['CMD', 'redis-cli', 'ping']
+  #     interval: 5s
+  #     timeout: 5s
+  #     retries: 10
+  #   networks:
+  #     - backend
   
   n8n:
     restart: unless-stopped
@@ -50,7 +50,7 @@ services:
       - DB_POSTGRESDB_USER=${N8N_DATABASE_USER}
       - DB_POSTGRESDB_PASSWORD=${N8N_DATABASE_PASSWORD}
       - EXECUTIONS_MODE=queue
-      - QUEUE_BULL_REDIS_HOST=redisn8n
+      - QUEUE_BULL_REDIS_HOST=redis
       - QUEUE_HEALTH_CHECK_ACTIVE=true
       - N8N_ENCRYPTION_KEY=${N8N_ENCRYPTION_KEY}
     links:
