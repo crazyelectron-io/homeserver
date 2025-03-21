@@ -19,8 +19,12 @@ services:
       - -c
       - |
         PGPASSWORD=${POSTGRES_PASSWORD} psql -U ${POSTGRES_USER} -d ${POSTGRES_DB} --host postgresdb -c "CREATE USER ${N8N_DATABASE_USER} WITH PASSWORD '${N8N_DATABASE_PASSWORD}';"
+        PGPASSWORD=${POSTGRES_PASSWORD} psql -U ${POSTGRES_USER} -d ${POSTGRES_DB} --host postgresdb -c "CREATE DATABASE ${N8N_DATABASE_NAME};"
         PGPASSWORD=${POSTGRES_PASSWORD} psql -U ${POSTGRES_USER} -d ${POSTGRES_DB} --host postgresdb -c "GRANT ALL PRIVILEGES ON DATABASE ${N8N_DATABASE_NAME} TO ${N8N_DATABASE_USER};"
-        PGPASSWORD=${POSTGRES_PASSWORD} psql -U ${POSTGRES_USER} -d ${POSTGRES_DB} --host postgresdb -c "GRANT CEATE ON SCHEMA public TO ${N8N_DATABASE_USER};"
+        PGPASSWORD=${POSTGRES_PASSWORD} psql -U ${POSTGRES_USER} -d ${POSTGRES_DB} --host postgresdb -c "GRANT ALL ON ALL TABLES IN SCHEMA public TO ${N8N_DATABASE_USER};"
+# PGPASSWORD=${POSTGRES_PASSWORD} psql -U ${POSTGRES_USER} -d ${POSTGRES_DB} --host postgresdb -c "CREATE USER ${N8N_DATABASE_USER} WITH PASSWORD '${N8N_DATABASE_PASSWORD}';"
+# PGPASSWORD=${POSTGRES_PASSWORD} psql -U ${POSTGRES_USER} -d ${POSTGRES_DB} --host postgresdb -c "GRANT ALL PRIVILEGES ON DATABASE ${N8N_DATABASE_NAME} TO ${N8N_DATABASE_USER};"
+# PGPASSWORD=${POSTGRES_PASSWORD} psql -U ${POSTGRES_USER} -d ${POSTGRES_DB} --host postgresdb -c "GRANT CREATE ON SCHEMA public TO ${N8N_DATABASE_USER};"
     networks:
       - backend
 
@@ -44,7 +48,6 @@ services:
     image: docker.n8n.io/n8nio/n8n
     container_name: n8n
     hostname: n8n
-    restart: unless-stopped
     env_file: .env
     environment:
       - DB_TYPE=postgresdb
@@ -53,21 +56,28 @@ services:
       - DB_POSTGRESDB_DATABASE=${N8N_DATABASE_NAME}
       - DB_POSTGRESDB_USER=${N8N_DATABASE_USER}
       - DB_POSTGRESDB_PASSWORD=${N8N_DATABASE_PASSWORD}
+      - DB_POSTGRESDB_SCHEMA=n8n
       - EXECUTIONS_MODE=queue
       - QUEUE_BULL_REDIS_HOST=redis
       - QUEUE_HEALTH_CHECK_ACTIVE=true
       - N8N_ENCRYPTION_KEY=${N8N_ENCRYPTION_KEY}
+      - N8N_SECURE_COOKIE=false
+      - OFFLOAD_MANUAL_EXECUTIONS_TO_WORKERS=true
+      - N8N_ENFORCE_SETTINGS_FILE_PERMISSIONS=false
+      - GENERIC_TIMEZONE="Europe/Amsterdam"
+      - TZ="Europe/Amsterdam"
     # links:
     #   - redisn8n
     volumes:
       - /mnt/data/appdata/n8n/data:/home/node/.n8n
-    depends_on:
+    # depends_on:
       # redisn8n:
       #   condition: service_healthy
-      postgresn8n:
-        condition: service_completed_successfully
+      # postgresn8n:
+      #   condition: service_completed_successfully
     ports:
       - 5678:5678
+    restart: unless-stopped
     networks:
       - backend
       - frontend
@@ -99,8 +109,9 @@ services:
       - DB_POSTGRESDB_DATABASE=${N8N_DATABASE_NAME}
       - DB_POSTGRESDB_USER=${N8N_DATABASE_USER}
       - DB_POSTGRESDB_PASSWORD=${N8N_DATABASE_PASSWORD}
+      - DB_POSTGRESDB_SCHEMA=n8n
       - EXECUTIONS_MODE=queue
-      - QUEUE_BULL_REDIS_HOST=redisn8n
+      - QUEUE_BULL_REDIS_HOST=redis
       - QUEUE_HEALTH_CHECK_ACTIVE=true
       - N8N_ENCRYPTION_KEY=${N8N_ENCRYPTION_KEY}
     # links:
