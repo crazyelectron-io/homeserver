@@ -100,12 +100,12 @@ services:
       - N8N_ENCRYPTION_KEY=${N8N_ENCRYPTION_KEY}
     links:
       - postgresn8n
-      - redisn8n
+      # - redisn8n
     volumes:
       - /mnt/data/appdata/n8n/data:/home/node/.n8n
     depends_on:
-      redisn8n:
-        condition: service_healthy
+      # redisn8n:
+      #   condition: service_healthy
       n8n:
         condition: service_completed_successfully
     command: worker
