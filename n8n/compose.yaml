@@ -68,6 +68,7 @@ services:
       - N8N_ENFORCE_SETTINGS_FILE_PERMISSIONS=false
       - N8N_RUNNERS_ENABLED=true
       - N8N_USER_MANAGEMENT_DISABLED=true
+      - N8N_BASIC_AUTH_ACTIVE=false
       - GENERIC_TIMEZONE="Europe/Amsterdam"
       - TZ="Europe/Amsterdam"
     # links:
