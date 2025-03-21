@@ -67,8 +67,10 @@ services:
       - OFFLOAD_MANUAL_EXECUTIONS_TO_WORKERS=true
       - N8N_ENFORCE_SETTINGS_FILE_PERMISSIONS=false
       - N8N_RUNNERS_ENABLED=true
-      - N8N_USER_MANAGEMENT_DISABLED=true
-      - N8N_BASIC_AUTH_ACTIVE=false
+      - N8N_PROXY_HOPS="1"
+      - NODE_ENV=production
+      - WEBHOOK_URL=https://${N8N_DOMAIN}
+      - EXPRESS_TRUST_PROXY=true
       - GENERIC_TIMEZONE="Europe/Amsterdam"
       - TZ="Europe/Amsterdam"
     # links:
