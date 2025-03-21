@@ -86,11 +86,11 @@ services:
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.n8n.entrypoints=http"
-      - "traefik.http.routers.n8n.rule=Host(`${HOME_DOMAIN}`) && PathPrefix(`/n8n`)"
+      - "traefik.http.routers.n8n.rule=Host(`${N8N_DOMAIN}`)"
       - "traefik.http.middlewares.n8n-https-redirect.redirectscheme.scheme=https"
       - "traefik.http.routers.n8n.middlewares=n8n-https-redirect"
       - "traefik.http.routers.n8n-secure.entrypoints=https"
-      - "traefik.http.routers.n8n-secure.rule=Host(`${HOME_DOMAIN}`) && PathPrefix(`/n8n`)"
+      - "traefik.http.routers.n8n-secure.rule=Host(`${N8N_DOMAIN}`)"
       - "traefik.http.routers.n8n-secure.middlewares=authentik@file"
       - "traefik.http.routers.n8n-secure.tls=true"
       - "traefik.http.routers.n8n.service=n8n"
