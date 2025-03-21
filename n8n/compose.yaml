@@ -53,13 +53,13 @@ services:
       - QUEUE_BULL_REDIS_HOST=redis
       - QUEUE_HEALTH_CHECK_ACTIVE=true
       - N8N_ENCRYPTION_KEY=${N8N_ENCRYPTION_KEY}
-    links:
-      - redisn8n
+    # links:
+    #   - redisn8n
     volumes:
       - /mnt/data/appdata/n8n/data:/home/node/.n8n
     depends_on:
-      redisn8n:
-        condition: service_healthy
+      # redisn8n:
+      #   condition: service_healthy
       postgresn8n:
         condition: service_completed_successfully
     ports:
