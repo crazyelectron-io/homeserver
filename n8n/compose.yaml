@@ -10,6 +10,10 @@ services:
     environment:
       - POSTGRES_USER=${POSTGRES_USER}
       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - POSTGRES_DB=${POSTGRES_DB}
+      - N8N_DATABASE_NAME=${N8N_DATABASE_NAME}
+      - N8N_DATABASE_USER=${N8N_DATABASE_USER}
+      - N8N_DATABASE_PASSWORD=${N8N_DATABASE_PASSWORD}
     command:
       - bash
       - -c
@@ -37,11 +41,11 @@ services:
   #     - backend
   
   n8n:
-    restart: unless-stopped
     image: docker.n8n.io/n8nio/n8n
-    env_file: .env
     container_name: n8n
     hostname: n8n
+    restart: unless-stopped
+    env_file: .env
     environment:
       - DB_TYPE=postgresdb
       - DB_POSTGRESDB_HOST=postgresdb
@@ -85,6 +89,7 @@ services:
     image: docker.n8n.io/n8nio/n8n
     container_name: n8nworker
     hostname: n8nworker
+    command: worker
     restart: unless-stopped
     env_file: .env
     environment:
@@ -98,17 +103,16 @@ services:
       - QUEUE_BULL_REDIS_HOST=redisn8n
       - QUEUE_HEALTH_CHECK_ACTIVE=true
       - N8N_ENCRYPTION_KEY=${N8N_ENCRYPTION_KEY}
-    links:
-      - postgresn8n
+    # links:
+    #   - postgresn8n
       # - redisn8n
     volumes:
       - /mnt/data/appdata/n8n/data:/home/node/.n8n
     depends_on:
       # redisn8n:
       #   condition: service_healthy
-      n8n:
-        condition: service_completed_successfully
-    command: worker
+      - n8n
+        # condition: service_completed_successfully
     networks:
       - backend
 
