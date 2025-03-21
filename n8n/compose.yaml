@@ -1,10 +1,10 @@
 ---
 services:
 
-  postgresn8n:
+  pginit-n8n:
     image: docker.io/library/postgres:16
-    container_name: postgresn8n
-    hostname: postgresn8n
+    container_name: pginit-n8n
+    hostname: pginit-n8n
     env_file: .env
     restart: "no"
     environment:
@@ -73,15 +73,8 @@ services:
       - EXPRESS_TRUST_PROXY=true
       - GENERIC_TIMEZONE="Europe/Amsterdam"
       - TZ="Europe/Amsterdam"
-    # links:
-    #   - redisn8n
     volumes:
       - /mnt/data/appdata/n8n/data:/home/node/.n8n
-    # depends_on:
-      # redisn8n:
-      #   condition: service_healthy
-      # postgresn8n:
-      #   condition: service_completed_successfully
     ports:
       - 5678:5678
     restart: unless-stopped
@@ -117,20 +110,17 @@ services:
       - DB_POSTGRESDB_USER=${N8N_DATABASE_USER}
       - DB_POSTGRESDB_PASSWORD=${N8N_DATABASE_PASSWORD}
       - DB_POSTGRESDB_SCHEMA=n8n
+      - NODE_ENV=production
       - EXECUTIONS_MODE=queue
       - QUEUE_BULL_REDIS_HOST=redis
       - QUEUE_HEALTH_CHECK_ACTIVE=true
       - N8N_ENCRYPTION_KEY=${N8N_ENCRYPTION_KEY}
-    # links:
-    #   - postgresn8n
-      # - redisn8n
+      - GENERIC_TIMEZONE="Europe/Amsterdam"
+      - TZ="Europe/Amsterdam"
     volumes:
       - /mnt/data/appdata/n8n/data:/home/node/.n8n
     depends_on:
-      # redisn8n:
-      #   condition: service_healthy
       - n8n
-        # condition: service_completed_successfully
     networks:
       - backend
 
