@@ -1,0 +1,47 @@
+---
+services:
+
+  # --- postgresdb - Setup the shared Postgres Database cluster ---
+  postgresdb:
+    container_name: postgresdb
+    hostname: postgresdb
+    image: docker.io/library/postgres:16
+    restart: unless-stopped
+    volumes:
+      - /mnt/data/appdata/postgres:/var/lib/postgresql/data:rw
+      - /mnt/data/backup:/backup:rw
+    env_file: .env
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "${POSTGRES_USER}", "-d", "${POSTGRES_DB}"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+    networks:
+      - backend
+
+  # Example Postgres Database setup
+  # postgressetup:
+  #   container_name: postgressetup
+  #   hostname: postgressetup
+  #   image: docker.io/library/postgres:16
+  #   depends_on:
+  #     postgresdb:
+  #       condition: service_healthy
+  #   restart: "no"
+  #   command:
+  #     - bash
+  #     - -c
+  #     - |
+  #       PGPASSWORD=${POSTGRES_PASSWORD} psql -U ${POSTGRES_USER} -d ${POSTGRES_DB} --host postgresdb -c "CREATE USER gebruiker4 WITH PASSWORD 'test101';"
+  #       PGPASSWORD=${POSTGRES_PASSWORD} psql -U ${POSTGRES_USER} -d ${POSTGRES_DB} --host postgresdb -c "CREATE DATABASE testdb4;"
+  #       PGPASSWORD=${POSTGRES_PASSWORD} psql -U ${POSTGRES_USER} -d ${POSTGRES_DB} --host postgresdb -c "GRANT ALL PRIVILEGES ON DATABASE testdb4 TO gebruiker4;"
+  #   networks:
+  #     - backend
+
+networks:
+  backend:
+    external: true
