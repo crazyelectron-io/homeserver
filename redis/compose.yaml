@@ -1,0 +1,22 @@
+---
+services:
+
+  redis:
+    container_name: redis
+    hostname: redis
+    image: docker.io/library/redis:7
+    restart: unless-stopped
+    env_file: .env
+    volumes:
+      - /mnt/data/appdata/redis:/data:rw
+    healthcheck:
+      test: ['CMD', 'redis-cli', 'ping']
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    networks:
+      - backend
+
+networks:
+  backend:
+    external: true
