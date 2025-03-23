@@ -10,12 +10,12 @@ services:
     environment:
       - USER_UID=1000
       - USER_GID=1000
+      - GITEA__database__HOST=postgresdb:5432
       - GITEA__database__DB_TYPE=postgres
       - GITEA__database__DB_HOST=postgresdb:5432
       - GITEA__database__DB_NAME=gitea
       - GITEA__database__DB_USER=${GITEA_DATABASE_USER}
       - GITEA__database__DB_PASSWD=${GITEA_DATABASE_PASSWORD}
-      - INSTALL_LOCK=true
       - ROOT_URL=${GITEA_DOMAIN}
     volumes:
       - /mnt/data/appdata/gitea/data:/data:rw
