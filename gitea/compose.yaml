@@ -16,6 +16,9 @@ services:
       - GITEA__database__DB_NAME=gitea
       - GITEA__database__DB_USER=${GITEA_DATABASE_USER}
       - GITEA__database__DB_PASSWD=${GITEA_DATABASE_PASSWORD}
+      - GITEA__database__LOG_SQL=false
+      - GITEA__database__SCHEMA=""
+      - GITEA__database__SSL_MODE=disable
       # - ROOT_URL=https://${GITEA_DOMAIN}
     volumes:
       - /mnt/data/appdata/gitea/data:/data:rw
