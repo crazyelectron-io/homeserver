@@ -51,7 +51,7 @@ services:
 
   # --- pginit-gitea - PostgreSQL initialization for Gitea
   pginit-gitea:
-    image: debian:bullseye-slim
+    image: docker.io/library/postgres:16
     container_name: pginit-gitea
     hostname: pginit-gitea
     env_file: .env
