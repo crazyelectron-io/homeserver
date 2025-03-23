@@ -3,7 +3,7 @@ services:
 
   # --- Gitea - Git with a cup of tea
   gitea:
-    image: gitea/gitea:latest
+    image: docker.gitea.com/gitea:1.23.5-rootless
     container_name: gitea
     hostname: gitea
     env_file: .env
@@ -11,14 +11,15 @@ services:
       - USER_UID=1000
       - USER_GID=1000
       - GITEA__database__DB_TYPE=postgres
-      - GITEA__database__DB_HOST=postresdb:5432
+      - GITEA__database__DB_HOST=postgresdb:5432
       - GITEA__database__DB_NAME=gitea
       - GITEA__database__DB_USER=${GITEA_DATABASE_USER}
       - GITEA__database__DB_PASSWD=${GITEA_DATABASE_PASSWORD}
       - INSTALL_LOCK=true
       - ROOT_URL=${GITEA_DOMAIN}
     volumes:
-      - /mnt/data/appdata/gitea:/data
+      - /mnt/data/appdata/gitea/data:/data:rw
+      - /mnt/data/appdata/gitea/config:/etc/gitea
       - /etc/timezone:/etc/timezone:ro
       - /etc/localtime:/etc/localtime:ro
     networks:
@@ -27,7 +28,7 @@ services:
     restart: unless-stopped
     ports:
       - "5000:3000"
-      # - "222:22"
+      - "2222:2222"
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:3000/"]
       interval: 30s
