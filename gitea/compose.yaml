@@ -78,9 +78,8 @@ services:
   #       PGPASSWORD=${POSTGRES_PASSWORD} psql -U ${POSTGRES_USER} -d ${POSTGRES_DB} --host postgresdb -c "GRANT ALL PRIVILEGES ON DATABASE gitea TO ${GITEA_DATABASE_USER};"
   #       PGPASSWORD=${POSTGRES_PASSWORD} psql -U ${POSTGRES_USER} -d ${POSTGRES_DB} --host postgresdb -c "GRANT ALL PRIVILEGES ON SCHEMA public TO ${GITEA_DATABASE_USER};"
 # PGPASSWORD=${POSTGRES_PASSWORD} psql -U ${POSTGRES_USER} -d ${POSTGRES_DB} --host postgresdb -c "GRANT CREATE ON SCHEMA public TO ${GITEA_DATABASE_USER};"
-
-    networks:
-      - backend
+#    networks:
+#      - backend
 
 networks:
   backend:
