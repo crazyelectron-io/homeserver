@@ -56,27 +56,27 @@ services:
       - "traefik.docker.network=frontend"
 
   # --- pginit-gitea - PostgreSQL initialization for Gitea
-  pginit-gitea:
-    image: docker.io/library/postgres:16
-    container_name: pginit-gitea
-    hostname: pginit-gitea
-    env_file: .env
-    restart: "no"
-    environment:
-      - POSTGRES_USER=${POSTGRES_USER}
-      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
-      - POSTGRES_DB=${POSTGRES_DB}
-      - GITEA_DATABASE_NAME=${GITEA_DATABASE_NAME}
-      - GITEA_DATABASE_USER=${GITEA_DATABASE_USER}
-      - GITEA_DATABASE_PASSWORD=${GITEA_DATABASE_PASSWORD}
-    command:
-      - bash
-      - -c
-      - |
-        PGPASSWORD=${POSTGRES_PASSWORD} psql -U ${POSTGRES_USER} -d ${POSTGRES_DB} --host postgresdb -c "CREATE USER ${GITEA_DATABASE_USER} WITH PASSWORD '${GITEA_DATABASE_PASSWORD}';"
-        PGPASSWORD=${POSTGRES_PASSWORD} psql -U ${POSTGRES_USER} -d ${POSTGRES_DB} --host postgresdb -c "CREATE DATABASE gitea;"
-        PGPASSWORD=${POSTGRES_PASSWORD} psql -U ${POSTGRES_USER} -d ${POSTGRES_DB} --host postgresdb -c "GRANT ALL PRIVILEGES ON DATABASE gitea TO ${GITEA_DATABASE_USER};"
-        PGPASSWORD=${POSTGRES_PASSWORD} psql -U ${POSTGRES_USER} -d ${POSTGRES_DB} --host postgresdb -c "GRANT ALL PRIVILEGES ON SCHEMA public TO ${GITEA_DATABASE_USER};"
+  # pginit-gitea:
+  #   image: docker.io/library/postgres:16
+  #   container_name: pginit-gitea
+  #   hostname: pginit-gitea
+  #   env_file: .env
+  #   restart: "no"
+  #   environment:
+  #     - POSTGRES_USER=${POSTGRES_USER}
+  #     - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+  #     - POSTGRES_DB=${POSTGRES_DB}
+  #     - GITEA_DATABASE_NAME=${GITEA_DATABASE_NAME}
+  #     - GITEA_DATABASE_USER=${GITEA_DATABASE_USER}
+  #     - GITEA_DATABASE_PASSWORD=${GITEA_DATABASE_PASSWORD}
+  #   command:
+  #     - bash
+  #     - -c
+  #     - |
+  #       PGPASSWORD=${POSTGRES_PASSWORD} psql -U ${POSTGRES_USER} -d ${POSTGRES_DB} --host postgresdb -c "w${GITEA_DATABASE_USER} WITH PASSWORD '${GITEA_DATABASE_PASSWORD}';"
+  #       PGPASSWORD=${POSTGRES_PASSWORD} psql -U ${POSTGRES_USER} -d ${POSTGRES_DB} --host postgresdb -c "CREATE DATABASE gitea;"
+  #       PGPASSWORD=${POSTGRES_PASSWORD} psql -U ${POSTGRES_USER} -d ${POSTGRES_DB} --host postgresdb -c "GRANT ALL PRIVILEGES ON DATABASE gitea TO ${GITEA_DATABASE_USER};"
+  #       PGPASSWORD=${POSTGRES_PASSWORD} psql -U ${POSTGRES_USER} -d ${POSTGRES_DB} --host postgresdb -c "GRANT ALL PRIVILEGES ON SCHEMA public TO ${GITEA_DATABASE_USER};"
 # PGPASSWORD=${POSTGRES_PASSWORD} psql -U ${POSTGRES_USER} -d ${POSTGRES_DB} --host postgresdb -c "GRANT CREATE ON SCHEMA public TO ${GITEA_DATABASE_USER};"
 
     networks:
