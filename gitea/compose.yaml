@@ -1,0 +1,81 @@
+---
+services:
+
+  # --- Gitea - Git with a cup of tea
+  gitea:
+    image: gitea/gitea:latest
+    container_name: gitea
+    hostname: gitea
+    env_file: .env
+    environment:
+      - USER_UID=1000
+      - USER_GID=1000
+      - GITEA__database__DB_TYPE=postgres
+      - GITEA__database__DB_HOST=postresdb:5432
+      - GITEA__database__DB_NAME=gitea
+      - GITEA__database__DB_USER=${GITEA_DATABASE_USER}
+      - GITEA__database__DB_PASSWD=${GITEA_DATABASE_PASSWORD}
+      - INSTALL_LOCK=true
+      - ROOT_URL=${GITEA_DOMAIN}
+    volumes:
+      - /mnt/data/appdata/gitea:/data
+      - /etc/timezone:/etc/timezone:ro
+      - /etc/localtime:/etc/localtime:ro
+    networks:
+      - backend
+      - frontend
+    restart: unless-stopped
+    ports:
+      - "5000:3000"
+      # - "222:22"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000/"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+    security_opt:
+      - no-new-privileges:true
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.gitea.entrypoints=http"
+      - "traefik.http.routers.gitea.rule=Host(`${GITEA_DOMAIN}`)"
+      - "traefik.http.middlewares.gitea-https-redirect.redirectscheme.scheme=https"
+      - "traefik.http.routers.gitea.middlewares=gitea-https-redirect"
+      - "traefik.http.routers.gitea-secure.entrypoints=https"
+      - "traefik.http.routers.gitea-secure.rule=Host(`${GITEA_DOMAIN}`)"
+      - "traefik.http.routers.gitea-secure.middlewares=authentik@file"
+      - "traefik.http.routers.gitea-secure.tls=true"
+      - "traefik.http.routers.gitea.service=gitea"
+      - "traefik.http.services.gitea.loadbalancer.server.port=3000"
+      - "traefik.docker.network=frontend"
+
+  # --- pginit-gitea - PostgreSQL initialization for Gitea
+  pginit-gitea:
+    image: debian:bullseye-slim
+    container_name: pginit-gitea
+    hostname: pginit-gitea
+    env_file: .env
+    restart: "no"
+    environment:
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - POSTGRES_DB=${POSTGRES_DB}
+      - GITEA_DATABASE_NAME=${GITEA_DATABASE_NAME}
+      - GITEA_DATABASE_USER=${GITEA_DATABASE_USER}
+      - GITEA_DATABASE_PASSWORD=${GITEA_DATABASE_PASSWORD}
+    command:
+      - bash
+      - -c
+      - |
+        PGPASSWORD=${POSTGRES_PASSWORD} psql -U ${POSTGRES_USER} -d ${POSTGRES_DB} --host postgresdb -c "CREATE USER ${GITEA_DATABASE_USER} WITH PASSWORD '${GITEA_DATABASE_PASSWORD}';"
+        PGPASSWORD=${POSTGRES_PASSWORD} psql -U ${POSTGRES_USER} -d ${POSTGRES_DB} --host postgresdb -c "CREATE DATABASE gitea;"
+        PGPASSWORD=${POSTGRES_PASSWORD} psql -U ${POSTGRES_USER} -d ${POSTGRES_DB} --host postgresdb -c "GRANT ALL PRIVILEGES ON DATABASE gitea TO ${GITEA_DATABASE_USER};"
+        PGPASSWORD=${POSTGRES_PASSWORD} psql -U ${POSTGRES_USER} -d ${POSTGRES_DB} --host postgresdb -c "GRANT ALL ON ALL TABLES IN SCHEMA public TO ${GITEA_DATABASE_USER};"
+    networks:
+      - backend
+
+networks:
+  backend:
+    external: true
+  frontend:
+    external: true
