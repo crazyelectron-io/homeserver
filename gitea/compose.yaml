@@ -10,6 +10,7 @@ services:
     environment:
       - USER_UID=1000
       - USER_GID=1000
+      - ENABLE_AUTO_REGISTRATION=true
       - GITEA__database__HOST=postgresdb:5432
       - GITEA__database__DB_TYPE=postgres
       - GITEA__database__DB_HOST=postgresdb:5432
