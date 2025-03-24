@@ -22,7 +22,7 @@ services:
       - GITEA__database__SSL_MODE=disable
       # - ROOT_URL=https://${GITEA_DOMAIN}
     volumes:
-      - /mnt/data/appdata/gitea/data:/data:rw
+      - /mnt/data/appdata/gitea/data:/var/lib/gitea:rw
       - /mnt/data/appdata/gitea/config:/etc/gitea
       - /etc/timezone:/etc/timezone:ro
       - /etc/localtime:/etc/localtime:ro
