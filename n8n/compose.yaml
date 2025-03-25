@@ -45,7 +45,7 @@ services:
   #     - backend
   
   n8n:
-    image: ${DOCKER_REGISTRY}/n8n
+    image: n8n
     container_name: n8n
     hostname: n8n
     env_file: .env
@@ -96,7 +96,7 @@ services:
       - "traefik.docker.network=frontend"
 
   n8nworker:
-    image: ${DOCKER_REGISTRY}/n8n
+    image: n8n
     container_name: n8nworker
     hostname: n8nworker
     command: worker
