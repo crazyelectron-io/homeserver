@@ -2,7 +2,7 @@
 services:
 
   pginit-n8n:
-    image: registry.moerman.online/ronmoerman/podtgres:16
+    image: registry.moerman.online/ronmoerman/postgres:16
     container_name: pginit-n8n
     hostname: pginit-n8n
     env_file: .env
