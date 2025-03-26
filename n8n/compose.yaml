@@ -96,7 +96,7 @@ services:
       - "traefik.docker.network=frontend"
 
   n8nworker:
-    image: n8n
+    image: ronmoerman/n8n
     container_name: n8nworker
     hostname: n8nworker
     command: worker
