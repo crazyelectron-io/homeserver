@@ -2,7 +2,7 @@
 services:
 
   pginit-n8n:
-    image: registry.moerman.online/postgres:16
+    image: postgres:16
     container_name: pginit-n8n
     hostname: pginit-n8n
     env_file: .env
@@ -45,7 +45,7 @@ services:
   #     - backend
   
   n8n:
-    image: registry.moerman.online/n8n:1.84.1
+    image: n8n:1.84.1
     container_name: n8n
     hostname: n8n
     env_file: .env
@@ -96,7 +96,7 @@ services:
       - "traefik.docker.network=frontend"
 
   n8nworker:
-    image: registry.moerman.online/n8n:1.84.1
+    image: n8n:1.84.1
     container_name: n8nworker
     hostname: n8nworker
     command: worker
