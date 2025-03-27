@@ -1,0 +1,97 @@
+---
+services:
+
+  # --- mealie - Meal Planner ---
+  mealie:
+    image: ghcr.io/mealie-recipes/mealie:v2.7.1
+    container_name: mealie
+    restart: unless-stopped
+    # ports:
+    #     - "9925:9000" # 
+    volumes:
+      - /mnt/data/appdata/mealie/data:/app/data/:rw
+      - /mnt/data/appdata/mealie/backup:/backup:rw
+    environment:
+      # Set Backend ENV Variables Here
+      ALLOW_SIGNUP: "false"
+      PUID: 1000
+      PGID: 1000
+      TZ: Europe/Amsterdam
+      BASE_URL: https://${MEALIE_DOMAIN}
+      # Database Settings
+      DB_ENGINE: postgres
+      POSTGRES_USER: ${MEALIE_POSTGRES_USER}
+      POSTGRES_PASSWORD: ${MEALIE_POSTGRES_PASSWORD}
+      POSTGRES_SERVER: postgresdb
+      POSTGRES_PORT: 5432
+      POSTGRES_DB: ${MEALIE_POSTGRES_DB}
+      # Mealie Settings
+      DEFAULT_HOUSEHOLD: "Familie Moerman"
+      TOKEN_TIME: 48
+      API_DOCS: "false"
+      DAILY_SCHEDULE_TIME: "23:45"
+      # Authentik SSO settings
+      OIDC_AUTH_ENABLED: "true"
+      OIDC_AUTO_REDIRECT: "true"
+      OIDC_PROVIDER_NAME: "Authentik SSO"
+      OIDC_CONFIGURATION_URL: https://${AUTHENTIK_DOMAIN}/application/o/mealie/.well-known/openid-configuration
+      OIDC_CLIENT_ID: ${MEALIE_CLIENT_ID}
+      OIDC_CLIENT_SECRET: ${MEALIE_CLIENT_SECRET}
+    depends_on:
+      - postgres-mealie
+    networks:
+      - frontend
+      - backend
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.mealie.entrypoints=http"
+      - "traefik.http.routers.mealie.rule=Host(`${MEALIE_DOMAIN}`)"
+      - "traefik.http.middlewares.mealie-https-redirect.redirectscheme.scheme=https"
+      - "traefik.http.routers.mealie.middlewares=mealie-https-redirect"
+      - "traefik.http.routers.mealie-secure.entrypoints=https"
+      - "traefik.http.routers.mealie-secure.rule=Host(`${MEALIE_DOMAIN}`)"
+      - "traefik.http.routers.mealie-secure.tls=true"
+      - "traefik.http.routers.mealie.service=mealie"
+      - "traefik.http.services.mealie.loadbalancer.server.port=9000"
+      - "traefik.docker.network=frontend"
+
+  # --- postgres-mealie - Postgres Database for Mealie ---
+  postgres-mealie:
+    container_name: postgres-mealie
+    hostname: postgres-mealie
+    image: docker.io/library/postgres:16
+    restart: "no"
+    command:
+      - bash
+      - -c
+      - |
+        PGPASSWORD=${POSTGRES_PASSWORD} psql -U ${POSTGRES_USER} -d ${POSTGRES_DB} --host postgresdb -c "CREATE ROLE ${MEALIE_POSTGRES_USER} WITH LOGIN SUPERUSER CREATEDB CREATEROLE INHERIT NOREPLICATION BYPASSRLS CONNECTION LIMIT -1 PASSWORD '${MEALIE_POSTGRES_PASSWORD}';"
+        PGPASSWORD=${POSTGRES_PASSWORD} psql -U ${POSTGRES_USER} -d ${POSTGRES_DB} --host postgresdb -c "CREATE DATABASE ${MEALIE_POSTGRES_DB} WITH OWNER = ${MEALIE_POSTGRES_USER} ENCODING = 'UTF8' LOCALE_PROVIDER = 'libc' CONNECTION LIMIT = -1 IS_TEMPLATE = False;"
+    networks:
+      - backend
+
+  # --- bring-api - Bring! API for Mealie ---
+  bring-api:
+    image: ghcr.io/felixschndr/mealie-bring-api:latest
+    container_name: bring_api
+    ports:
+      - 12001:8742
+    environment:
+      # Take a look at the README for an explanation of the environment variables
+      BRING_USERNAME: "${BRING_USERNAME}"
+      BRING_PASSWORD: "${BRING_PASSWORD}"
+      BRING_LIST_NAME: "${BRING_LIST_NAME}"
+      IGNORED_INGREDIENTS: "Peper,Zout,Water,Olie,Olijfolie"
+      LOG_LEVEL: INFO
+      HTTP_PORT: 8742
+      # HTTP_BASE_PATH: /bring
+    depends_on:
+      - mealie
+    networks:
+      - backend
+
+networks:
+  frontend:
+    external: true
+  backend:
+    external: true
