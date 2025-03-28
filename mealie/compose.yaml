@@ -56,7 +56,7 @@ services:
       - "traefik.docker.network=frontend"
 
   # --- postgres-mealie - Postgres Database for Mealie ---
-  postgres-mealie:
+  pginit-mealie:
     container_name: postgres-mealie
     hostname: postgres-mealie
     image: docker.io/library/postgres:16
