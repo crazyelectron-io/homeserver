@@ -93,11 +93,11 @@ services:
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.bring.entrypoints=http"
-      - "traefik.http.routers.bring.rule=Host(`${MEALIE_DOMAIN}/bring`)"
+      - "traefik.http.routers.bring.rule=Host(`${BRING_DOMAIN}/bring`)"
       - "traefik.http.middlewares.bring-https-redirect.redirectscheme.scheme=https"
       - "traefik.http.routers.bring.middlewares=mealie-https-redirect"
       - "traefik.http.routers.bring-secure.entrypoints=https"
-      - "traefik.http.routers.bring-secure.rule=Host(`${MEALIE_DOMAIN}/bring`)"
+      - "traefik.http.routers.bring-secure.rule=Host(`${BRING_DOMAIN}/bring`)"
       - "traefik.http.routers.bring-secure.tls=true"
       - "traefik.http.routers.bring.service=bring"
       - "traefik.http.services.bring.loadbalancer.server.port=8742"
