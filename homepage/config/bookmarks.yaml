@@ -9,12 +9,12 @@
           description: My GitHub Repository
           icon: github.png
           href: https://github.com/
-    - Microsft Azure:
+    - Microsoft Azure:
         - abbr: AZ
           description: Microsoft Azure Portal
           icon: azure.png
           href: https://portal.azure.com/
-    - Microsft 365:
+    - Microsoft 365 Asdmin:
         - abbr: M3
           description: Microsoft 365 Admin Portal
           icon: office.png
@@ -36,6 +36,11 @@
           icon: cloudflare.png
           href: https://dash.cloudflare.com/
 - Home:
+    - clouds+more Office365:
+        - abbr: O3
+          description: clouds+more Office365
+          icon: office.png
+          href: https://outlook.office.com/
     - iCloud:
         - abbr: IC
           href: https://icloud.com
