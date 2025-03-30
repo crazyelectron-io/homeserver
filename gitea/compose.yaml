@@ -24,6 +24,7 @@ services:
     volumes:
       - /mnt/data/appdata/gitea/data:/var/lib/gitea:rw
       - /mnt/data/appdata/gitea/config:/etc/gitea
+      - /mnt/data/appdata/gitea/backup:/backup
       - /etc/timezone:/etc/timezone:ro
       - /etc/localtime:/etc/localtime:ro
     networks:
@@ -79,6 +80,7 @@ services:
     networks:
       - backend
 
+# --- Docker networks ---
 networks:
   backend:
     external: true
