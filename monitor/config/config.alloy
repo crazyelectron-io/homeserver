@@ -84,13 +84,76 @@ loki.relabel "journal" {
   } */
 }
 
-// --- Collect Docker logs
-discovery.docker "logs_integrations_docker" {
+// --- Collect Docker metrics
+discovery.docker "docker_host_metrics" {
   host = "unix:///var/run/docker.sock"
-  refresh_interval = "5s"
+  //refresh_interval = "5s"
+
+  filter {
+    name = "label"
+    values = ["alloy.metrics.enable=true"]
+  }
+
 }
-discovery.relabel "logs_integrations_docker" {
-  targets = []
+
+// --- Collect Docker logs
+discovery.docker "docker_host_logs" {
+  host = "unix:///var/run/docker.sock"
+  //refresh_interval = "5s"
+
+  filter {
+    name = "label"
+    values = ["alloy.logs.enable=true"]
+  }
+
+}
+
+// --- Relabel Docker metrics
+discovery.relabel "docker_metrics_labels" {
+  targets = discovery.docker.docker_host_metrics.targets
+
+  rule {
+    source_labels = ["__meta_docker_container_label_alloy_metrics_path"]
+    regex         = "(.*)"
+    target_label  = "__metrics_path__"
+    replacement  = "$1"
+  }
+  rule {
+    source_labels = ["__meta_docker_container_label_alloy_metrics_scrape_interval"]
+    regex         = "(.*)"
+    target_label  = "__scrape_interval__"
+    replacement  = "$1"
+  }
+  rule {
+    source_labels = ["__meta_docker_container_label_alloy_metrics_custom_param"]
+    regex         = "(.*)"
+    target_label  = "__param_custom_param"
+    replacement  = "$1"
+  }
+  rule {
+    source_labels = ["__meta_docker_container_label_alloy_metrics_scrape_timeout"]
+    regex         = "(.*)"
+    target_label  = "__scrape_timeout__"
+    replacement  = "$1"
+  }
+  rule {
+    source_labels = ["__meta_docker_container_label_alloy_metrics_scrape_scheme"]
+    regex         = "(.*)"
+    target_label  = "__scheme__"
+    replacement  = "$1"
+  }
+  rule {
+    action = "replace"
+    replacement = sys.env("HOSTNAME"
+    target_label = "container_name")
+  }
+}
+
+
+// --- Relabel Docker logs
+discovery.relabel "docker_logs_labels" {
+  targets = discovery.docker.docker_host_logs.targets
+
   rule {
     target_label = "job"
     replacement  = "integrations/docker"

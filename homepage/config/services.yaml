@@ -205,6 +205,13 @@
         siteMonitor: https://n8n.moerman.online
         showStats: true
         statusStyle: 'dot'
+    - Repository:
+        href: https://registry.moerman.online
+        description: Git and Container repositories
+        icon: gitea.png
+        siteMonitor: https://registry.moerman.online
+        showStats: true
+        statusStyle: 'dot'
     - Traefik:
         icon: traefik.png
         description: Traefik Dashboard
