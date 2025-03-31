@@ -212,6 +212,10 @@
         siteMonitor: https://registry.moerman.online
         showStats: true
         statusStyle: 'dot'
+        widget:
+            type: gitea
+            url: http://registry.moerman.online
+            key: d2a3cf0c20e1a5b8e2bc1d5886b998c0c507bf7a
     - Traefik:
         icon: traefik.png
         description: Traefik Dashboard
