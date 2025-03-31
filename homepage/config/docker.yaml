@@ -1,5 +1,0 @@
----
-localdocker:
-  socket: /var/run/docker.sock
-  # host: 10.0.0.3
-  # port: 2375

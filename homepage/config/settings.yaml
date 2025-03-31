@@ -1,8 +1,0 @@
-title: Family Homepage
-layout:
-  Media:
-    style: row
-    columns: 4
-language: nl
-target: _blank
-showStats: true
